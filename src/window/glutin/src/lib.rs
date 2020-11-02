@@ -44,7 +44,7 @@ mod headless;
 ///
 /// fn main() {
 ///     let events_loop = glutin::EventsLoop::new();
-///     let window_builder = glutin::WindowBuilder::new().with_title("Example".to_string());
+///     let window_builder = glutin::window::WindowBuilder::new().with_title("Example".to_string());
 ///     let context = glutin::ContextBuilder::new();
 ///     let (window, device, factory, rtv, stv) =
 ///         gfx_window_glutin::init::<Rgba8, DepthStencil>(window_builder, context, &events_loop)
@@ -53,9 +53,9 @@ mod headless;
 ///     // your code
 /// }
 /// ```
-pub fn init<Cf, Df>(window: glutin::WindowBuilder,
+pub fn init<Cf, Df, ELT>(window: glutin::window::WindowBuilder,
                     context: glutin::ContextBuilder<NotCurrent>,
-                    events_loop: &glutin::EventsLoop) ->
+                    events_loop: &glutin::event_loop::EventLoop<ELT>) ->
             Result<(glutin::WindowedContext<PossiblyCurrent>, device_gl::Device, device_gl::Factory,
             handle::RenderTargetView<R, Cf>, handle::DepthStencilView<R, Df>), CreationError>
 where
@@ -106,7 +106,7 @@ where
 fn get_window_dimensions(ctx: &glutin::WindowedContext<PossiblyCurrent>) -> texture::Dimensions {
     let window = ctx.window();
     let (width, height) = {
-        let size = window.get_inner_size().unwrap().to_physical(window.get_hidpi_factor());
+        let size = window.inner_size();
         (size.width as _, size.height as _)
     };
     let aa = ctx
@@ -117,13 +117,13 @@ fn get_window_dimensions(ctx: &glutin::WindowedContext<PossiblyCurrent>) -> text
 }
 
 /// Initialize with a window builder. Raw version.
-pub fn init_raw(window: glutin::WindowBuilder,
-                context: glutin::ContextBuilder<NotCurrent>,
-                events_loop: &glutin::EventsLoop,
-                color_format: format::Format,
-                ds_format: format::Format) ->
-                Result<(glutin::WindowedContext<PossiblyCurrent>, device_gl::Device, device_gl::Factory,
-                handle::RawRenderTargetView<R>, handle::RawDepthStencilView<R>), CreationError>
+pub fn init_raw<T>(window: glutin::window::WindowBuilder,
+                   context: glutin::ContextBuilder<NotCurrent>,
+                   events_loop: &glutin::event_loop::EventLoop<T>,
+                   color_format: format::Format,
+                   ds_format: format::Format) ->
+                   Result<(glutin::WindowedContext<PossiblyCurrent>, device_gl::Device, device_gl::Factory,
+                   handle::RawRenderTargetView<R>, handle::RawDepthStencilView<R>), CreationError>
 {
     let window = {
         let color_total_bits = color_format.0.get_total_bits();
